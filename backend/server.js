@@ -48,13 +48,19 @@ const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
 
 if (smtpUser && smtpPass) {
+  const cleanPass = smtpPass.trim().replace(/\s+/g, '');
+  const smtpPort = parseInt(process.env.SMTP_PORT || '465');
+
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '465'),
-    secure: process.env.SMTP_PORT === '465' || !process.env.SMTP_PORT, // true for 465, false for other ports
+    port: smtpPort,
+    secure: smtpPort === 465, // true for 465, false for other ports
     auth: {
-      user: smtpUser,
-      pass: smtpPass
+      user: smtpUser.trim(),
+      pass: cleanPass
+    },
+    tls: {
+      rejectUnauthorized: false // Bypasses self-signed certificate issues in cloud environments like Render
     }
   });
   console.log('Email forwarding transporter configured successfully.');
