@@ -26,3 +26,11 @@ dist-ssr
 # Local Databases
 *.db
 backend/node_modules
+
+# Environments
+.env
+.env.local
+.env.*
+!.env.example
+
+

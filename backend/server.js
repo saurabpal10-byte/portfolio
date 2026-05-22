@@ -2,6 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
+const nodemailer = require('nodemailer');
+
+// Load environment variables if local file exists
+try {
+  process.loadEnvFile(path.resolve(__dirname, '.env'));
+} catch (e) {
+  // .env file not found, which is normal in production (e.g. Render environment variables)
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -34,6 +42,64 @@ db.exec(`CREATE TABLE IF NOT EXISTS posts (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`);
 
+// Email Transporter Setup
+let transporter = null;
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+
+if (smtpUser && smtpPass) {
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '465'),
+    secure: process.env.SMTP_PORT === '465' || !process.env.SMTP_PORT, // true for 465, false for other ports
+    auth: {
+      user: smtpUser,
+      pass: smtpPass
+    }
+  });
+  console.log('Email forwarding transporter configured successfully.');
+} else {
+  console.log('SMTP credentials not fully configured. Email forwarding is disabled.');
+}
+
+async function sendForwardingEmail(name, email, message) {
+  if (!transporter) {
+    console.log('Skipping email forward (transporter not configured)');
+    return;
+  }
+
+  const receiver = process.env.CONTACT_RECEIVER || smtpUser;
+  const mailOptions = {
+    from: `"${name} (Portfolio)" <${smtpUser}>`,
+    to: receiver,
+    replyTo: email,
+    subject: `New Portfolio Message from ${name}`,
+    text: `You have received a new message from your portfolio contact form:
+
+Name: ${name}
+Email: ${email}
+Message: ${message}
+
+---
+To reply directly to them, just reply to this email.`,
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+        <h2 style="color: #4f46e5; border-bottom: 2px solid #eef2f6; padding-bottom: 10px; margin-top: 0;">New Portfolio Message</h2>
+        <p style="margin: 5px 0;"><strong>Name:</strong> ${name}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+        <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #4f46e5; border-radius: 4px; margin: 20px 0;">
+          <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 12px; color: #64748b; text-align: center;">This message was automatically forwarded from your portfolio contact form.</p>
+      </div>
+    `
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log(`Email successfully forwarded to ${receiver}`);
+}
+
 // API Routes
 app.post('/api/contact', (req, res) => {
   const { name, email, message } = req.body;
@@ -46,6 +112,11 @@ app.post('/api/contact', (req, res) => {
     const stmt = db.prepare('INSERT INTO contacts (name, email, message) VALUES (?, ?, ?)');
     const info = stmt.run(name, email, message);
     
+    // Trigger email forwarding asynchronously in the background
+    sendForwardingEmail(name, email, message).catch(err => {
+      console.error('Email forwarding failed:', err.message);
+    });
+
     res.status(201).json({ 
       success: true, 
       message: 'Message sent successfully',
