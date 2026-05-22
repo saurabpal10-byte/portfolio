@@ -16,7 +16,7 @@ const certifications = [
     description: 'Completed the Explore Machine Learning Using Python certification from Infosys Springboard, gaining foundational knowledge in data preprocessing, exploratory data analysis, predictive modeling, supervised learning, model evaluation, and data visualization while developing hands-on experience with Python-based machine learning techniques for solving real-world data-driven problems.',
     year: '2025',
     skills: ['Predictive Modeling', 'Supervised Learning', 'Python'],
-    link: 'https://www.credly.com/users/saurav-pal10'
+    link: 'https://drive.google.com/file/d/1pQDhSVFCm1AQ4pRFJ3rqMK3kI-qpZ-3f/view?usp=drivesdk'
   },
   {
     name: 'Data Analytics Job Simulation Virtual Experience',
@@ -24,7 +24,7 @@ const certifications = [
     year: '2025',
     description: 'Completed the Data Analytics Job Simulation program by Deloitte, gaining practical experience in data analysis, data visualization, business intelligence, and problem-solving through real-world analytical tasks. Developed skills in interpreting complex datasets, creating meaningful insights, and applying analytical thinking to support data-driven business decisions using modern analytics and visualization concepts.',
     skills: ['Data Visualization', 'Business Intelligence', 'Data Analysis'],
-    link: 'https://www.credly.com/users/saurav-pal10'
+    link: 'https://drive.google.com/file/d/17x3613sbm2rQImpCWYpy0lPgVE2Ulvr_/view?usp=drivesdk'
   }
 ];
 
