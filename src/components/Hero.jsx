@@ -1,12 +1,209 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Download, Mail } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './Icons';
 import profileImg from '../assets/profile_avatar.jpg';
 
+// Zero-dependency matrix-style character decoding scrambler hook
+const roles = ['AI ENGINEERING', 'DEEP LEARNING MODELING', 'DATA ANALYTICS', 'FULL-STACK DEVELOPMENT'];
+const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=';
+
+const Scrambler = () => {
+  const [displayText, setDisplayText] = useState(roles[0]);
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  useEffect(() => {
+    let intervalId;
+    let timeoutId;
+    
+    const triggerScramble = (targetText) => {
+      let iteration = 0;
+      clearInterval(intervalId);
+      
+      intervalId = setInterval(() => {
+        setDisplayText((prev) => 
+          targetText
+            .split('')
+            .map((char, index) => {
+              if (index < iteration) {
+                return targetText[index];
+              }
+              return chars[Math.floor(Math.random() * chars.length)];
+            })
+            .join('')
+        );
+        
+        if (iteration >= targetText.length) {
+          clearInterval(intervalId);
+        }
+        
+        iteration += 1 / 3;
+      }, 30);
+    };
+
+    const cycleRoles = () => {
+      timeoutId = setTimeout(() => {
+        const nextIndex = (roleIndex + 1) % roles.length;
+        setRoleIndex(nextIndex);
+        triggerScramble(roles[nextIndex]);
+        cycleRoles();
+      }, 4500);
+    };
+
+    cycleRoles();
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [roleIndex]);
+
+  return <span className="scramble-highlight">{displayText}</span>;
+};
+
+// HTML5 Canvas dynamic neural network mesh with mouse attraction
+const NeuralBackdrop = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+
+    let width = (canvas.width = canvas.offsetWidth);
+    let height = (canvas.height = canvas.offsetHeight);
+
+    const particles = [];
+    const particleCount = 42;
+    const connectionDistance = 120;
+    const mouse = { x: null, y: null, radius: 160 };
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.35;
+        this.vy = (Math.random() - 0.5) * 0.35;
+        this.radius = Math.random() * 1.5 + 0.8;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
+
+        // Mouse attraction
+        if (mouse.x !== null) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < mouse.radius) {
+            const force = (mouse.radius - dist) / mouse.radius;
+            this.x += (dx / dist) * force * 0.45;
+            this.y += (dy / dist) * force * 0.45;
+          }
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(229, 193, 88, 0.45)';
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.x = null;
+      mouse.y = null;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      particles.forEach((p) => {
+        p.update();
+        p.draw();
+      });
+
+      // Draw connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const p1 = particles[i];
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < connectionDistance) {
+            const alpha = (1 - dist / connectionDistance) * 0.16;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(229, 193, 88, ${alpha})`;
+            ctx.lineWidth = 0.55;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (canvas) canvas.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        opacity: 0.7
+      }}
+    />
+  );
+};
+
 const Hero = () => {
   return (
     <section id="hero" className="hero-section">
+      <NeuralBackdrop />
       <div className="container" style={{ position: 'relative', zIndex: 2 }}>
         <div className="hero-grid">
 
@@ -26,6 +223,11 @@ const Hero = () => {
             <h1 className="hero-title">
               Building intelligent systems that solve <span className="italic-accent">real-world problems.</span>
             </h1>
+
+            {/* Glowing Custom Role Decoders */}
+            <div className="hero-role-scrambler animate-on-scroll visible">
+              <span className="role-scramble-prefix">// FIELD:</span> <Scrambler />
+            </div>
 
             <p className="hero-description">
               Final-year Information Science & Engineering student specializing in AI engineering, data analytics, and transforming ideas into scalable intelligent solutions.
@@ -494,6 +696,32 @@ const Hero = () => {
           .hero-scroll-indicator {
             display: none;
           }
+        }
+
+        /* Scrambler Highlight Styles */
+        .hero-role-scrambler {
+          font-family: var(--font-sans);
+          font-size: 0.9rem;
+          font-weight: 500;
+          letter-spacing: 0.12em;
+          margin-bottom: 2.25rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          opacity: 0.9;
+        }
+
+        .role-scramble-prefix {
+          color: var(--text-secondary);
+          opacity: 0.65;
+          font-size: 0.8rem;
+        }
+
+        .scramble-highlight {
+          color: var(--accent-color);
+          font-weight: 700;
+          text-shadow: 0 0 10px rgba(229, 193, 88, 0.2);
+          letter-spacing: 0.05em;
         }
       `}</style>
     </section>
