@@ -76,11 +76,58 @@ if (smtpUser && smtpPass) {
 }
 
 async function sendForwardingEmail(name, email, message) {
-  if (!transporter) {
-    console.log('Skipping email forward (transporter not configured)');
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  // Option 1: Use Resend HTTP API (Highly recommended for cloud environments like Render to bypass SMTP blocks)
+  if (resendApiKey) {
+    console.log('Attempting to forward email via Resend API...');
+    const receiver = process.env.CONTACT_RECEIVER || 'saurabpal10@gmail.com';
+    
+    const payload = {
+      from: `Portfolio Contact Form <onboarding@resend.dev>`,
+      to: receiver,
+      replyTo: email,
+      subject: `New Portfolio Message from ${name}`,
+      text: `You have received a new message from your portfolio contact form:\n\nName: ${name}\nEmail: ${email}\nMessage: ${message}\n\n---\nTo reply directly to them, just reply to this email.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+          <h2 style="color: #4f46e5; border-bottom: 2px solid #eef2f6; padding-bottom: 10px; margin-top: 0;">New Portfolio Message</h2>
+          <p style="margin: 5px 0;"><strong>Name:</strong> ${name}</p>
+          <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #4f46e5; border-radius: 4px; margin: 20px 0;">
+            <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+          </div>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 12px; color: #64748b; text-align: center;">This message was automatically forwarded from your portfolio contact form via Resend.</p>
+        </div>
+      `
+    };
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${resendApiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(`Resend API Error: ${JSON.stringify(data)}`);
+    }
+
+    console.log(`Email successfully forwarded to ${receiver} via Resend.`);
     return;
   }
 
+  // Option 2: Fallback to standard Nodemailer SMTP (Works locally where ports are unblocked)
+  if (!transporter) {
+    console.log('Skipping email forward (neither Resend API Key nor Nodemailer SMTP is configured)');
+    return;
+  }
+
+  console.log('Attempting to forward email via Nodemailer SMTP...');
   const receiver = process.env.CONTACT_RECEIVER || smtpUser;
   const mailOptions = {
     from: `"${name} (Portfolio)" <${smtpUser}>`,
@@ -110,8 +157,9 @@ To reply directly to them, just reply to this email.`,
   };
 
   await transporter.sendMail(mailOptions);
-  console.log(`Email successfully forwarded to ${receiver}`);
+  console.log(`Email successfully forwarded to ${receiver} via SMTP.`);
 }
+
 
 // API Routes
 app.post('/api/contact', (req, res) => {
@@ -232,13 +280,16 @@ app.get('/api/test-email', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized: Invalid passcode' });
   }
 
+  const resendApiKey = process.env.RESEND_API_KEY;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
   const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
   const smtpPort = process.env.SMTP_PORT || '465';
-  const receiver = process.env.CONTACT_RECEIVER || smtpUser;
+  const receiver = process.env.CONTACT_RECEIVER || smtpUser || 'saurabpal10@gmail.com';
 
   const debugInfo = {
+    usingResendAPI: !!resendApiKey,
+    resendApiKeyLength: resendApiKey ? resendApiKey.length : 0,
     smtpUserConfigured: !!smtpUser,
     smtpUserVal: smtpUser ? `${smtpUser.slice(0, 3)}...${smtpUser.slice(-3)}` : null,
     smtpPassConfigured: !!smtpPass,
@@ -249,10 +300,59 @@ app.get('/api/test-email', async (req, res) => {
     transporterInitialized: !!transporter
   };
 
+  // Option 1: Test Resend API
+  if (resendApiKey) {
+    try {
+      console.log('Running test email via Resend API...');
+      const payload = {
+        from: `SMTP/API Test <onboarding@resend.dev>`,
+        to: receiver,
+        subject: `Resend API Test Successful!`,
+        text: `Your portfolio website's email forwarding is configured correctly and working in production via the Resend API!`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+            <h2 style="color: #10b981; border-bottom: 2px solid #eef2f6; padding-bottom: 10px; margin-top: 0;">Resend API Test Successful</h2>
+            <p>Your portfolio website's email forwarding is configured correctly and working in production via Resend API!</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 12px; color: #64748b; text-align: center;">This is a system test message.</p>
+          </div>
+        `
+      };
+
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${resendApiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`Resend API Error: ${JSON.stringify(data)}`);
+      }
+
+      return res.json({
+        success: true,
+        message: 'Test email successfully sent and verified via Resend API!',
+        debug: debugInfo
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'Resend API Test Failed',
+        error: err.message,
+        debug: debugInfo
+      });
+    }
+  }
+
+  // Option 2: Test Nodemailer SMTP
   if (!transporter) {
     return res.status(400).json({
       success: false,
-      message: 'Transporter not configured. Please check your environment variables.',
+      message: 'Neither Resend API Key nor Nodemailer SMTP is configured. Please check your environment variables.',
       debug: debugInfo
     });
   }
@@ -280,7 +380,7 @@ app.get('/api/test-email', async (req, res) => {
     await transporter.sendMail(mailOptions);
     return res.json({
       success: true,
-      message: 'Test email successfully sent and verified!',
+      message: 'Test email successfully sent and verified via Nodemailer SMTP!',
       debug: debugInfo
     });
   } catch (err) {
