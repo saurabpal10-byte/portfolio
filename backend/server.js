@@ -217,6 +217,76 @@ app.get('/api/contacts', (req, res) => {
   }
 });
 
+// Secure Route to test SMTP configuration and send a test email
+app.get('/api/test-email', async (req, res) => {
+  const passcode = req.headers['x-passcode'] || req.query.passcode;
+
+  if (passcode !== 'saurav123') {
+    return res.status(401).json({ error: 'Unauthorized: Invalid passcode' });
+  }
+
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const smtpPort = process.env.SMTP_PORT || '465';
+  const receiver = process.env.CONTACT_RECEIVER || smtpUser;
+
+  const debugInfo = {
+    smtpUserConfigured: !!smtpUser,
+    smtpUserVal: smtpUser ? `${smtpUser.slice(0, 3)}...${smtpUser.slice(-3)}` : null,
+    smtpPassConfigured: !!smtpPass,
+    smtpPassLength: smtpPass ? smtpPass.length : 0,
+    smtpHost,
+    smtpPort,
+    receiverVal: receiver ? `${receiver.slice(0, 3)}...${receiver.slice(-3)}` : null,
+    transporterInitialized: !!transporter
+  };
+
+  if (!transporter) {
+    return res.status(400).json({
+      success: false,
+      message: 'Transporter not configured. Please check your environment variables.',
+      debug: debugInfo
+    });
+  }
+
+  try {
+    // Verify transporter connection configuration
+    await transporter.verify();
+    
+    // Send a test email
+    const mailOptions = {
+      from: `"SMTP Test (Portfolio)" <${smtpUser}>`,
+      to: receiver,
+      subject: `SMTP Test Successful!`,
+      text: `Your portfolio website's email forwarding is configured correctly and working in production!`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+          <h2 style="color: #10b981; border-bottom: 2px solid #eef2f6; padding-bottom: 10px; margin-top: 0;">SMTP Test Successful</h2>
+          <p>Your portfolio website's email forwarding is configured correctly and working in production!</p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 12px; color: #64748b; text-align: center;">This is a system test message.</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    return res.json({
+      success: true,
+      message: 'Test email successfully sent and verified!',
+      debug: debugInfo
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: 'SMTP Test Failed',
+      error: err.message,
+      stack: err.stack,
+      debug: debugInfo
+    });
+  }
+});
+
 // Serve static assets from the Vite production build
 app.use(express.static(path.join(__dirname, '../dist')));
 
