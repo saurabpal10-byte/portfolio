@@ -25,6 +25,9 @@ const Blog = () => {
   // Lightbox view for image zoom
   const [zoomImage, setZoomImage] = useState(null);
 
+  // Full blog post reading view state
+  const [selectedPost, setSelectedPost] = useState(null);
+
   // Format date safely to avoid any locale/parsing crashes
   const formatDate = (dateStr) => {
     try {
@@ -94,6 +97,21 @@ const Blog = () => {
       observer.disconnect();
     };
   }, [loading, posts, error]);
+
+  // Handle escape key listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedPost(null);
+        setIsModalOpen(false);
+        setZoomImage(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Handle Image Conversion to Base64
   const handleImageChange = (e) => {
@@ -285,6 +303,7 @@ const Blog = () => {
               <article 
                 key={post.id} 
                 className="glass-panel animate-on-scroll blog-card"
+                onClick={() => setSelectedPost(post)}
                 style={{
                   transitionDelay: `${idx * 100}ms`,
                   display: 'flex',
@@ -295,13 +314,17 @@ const Blog = () => {
                   minHeight: '420px',
                   border: '1px solid var(--border-color)',
                   borderRadius: '20px',
-                  position: 'relative'
+                  position: 'relative',
+                  cursor: 'pointer'
                 }}
               >
                 {/* Delete button */}
                 <button
                   className="blog-delete-btn"
-                  onClick={() => handleDelete(post.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(post.id);
+                  }}
                   title="Delete this entry"
                   style={{
                     position: 'absolute',
@@ -327,7 +350,13 @@ const Blog = () => {
 
                 {/* Event Image Banner (Optional) */}
                 {post.image ? (
-                  <div className="blog-image-wrapper" onClick={() => setZoomImage(post.image)}>
+                  <div 
+                    className="blog-image-wrapper" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setZoomImage(post.image);
+                    }}
+                  >
                     <img 
                       src={post.image} 
                       alt={post.title} 
@@ -368,6 +397,11 @@ const Blog = () => {
                   <p className="blog-card-text">
                     {post.content}
                   </p>
+
+                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-color)', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.3s ease' }} className="blog-read-more">
+                    <span>Read Full Story</span>
+                    <BookOpen size={14} className="blog-read-more-icon" />
+                  </div>
                 </div>
               </article>
             ))}
@@ -621,6 +655,64 @@ const Blog = () => {
           </div>
         )}
 
+        {/* Modal: Read Full Blog Post */}
+        {selectedPost && (
+          <div className="modal-overlay" onClick={() => setSelectedPost(null)}>
+            <div className="modal-content glass-panel blog-read-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '750px', width: '92%', padding: 0, overflowY: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column', borderRadius: '24px', border: '1px solid rgba(229, 193, 88, 0.2)' }}>
+              
+              {/* Top Banner (Optional Image or styled gradient) */}
+              {selectedPost.image ? (
+                <div style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', flexShrink: 0 }}>
+                  <img src={selectedPost.image} alt={selectedPost.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, rgba(13, 12, 12, 0.95), transparent)' }}></div>
+                  <button 
+                    onClick={() => setSelectedPost(null)} 
+                    style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', color: '#fff', backgroundColor: 'rgba(13, 12, 12, 0.75)', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', cursor: 'pointer', zIndex: 10 }}
+                    className="modal-close-btn"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{ position: 'relative', width: '100%', padding: '2.5rem 2.5rem 1rem 2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--accent-color)', fontSize: '0.8rem', fontWeight: 500 }}>
+                    <Calendar size={14} />
+                    <span>{formatDate(selectedPost.event_date)}</span>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedPost(null)} 
+                    style={{ color: 'var(--text-secondary)', transition: 'all 0.3s ease', cursor: 'pointer' }} 
+                    className="modal-close-btn"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              )}
+
+              {/* Scrollable Content Container */}
+              <div className="blog-modal-body" style={{ padding: selectedPost.image ? '1.5rem 2.5rem 2.5rem 2.5rem' : '0 2.5rem 2.5rem 2.5rem', overflowY: 'auto', flexGrow: 1 }}>
+                {selectedPost.image && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--accent-color)', fontSize: '0.8rem', fontWeight: 500, marginBottom: '1rem' }}>
+                    <Calendar size={14} />
+                    <span>{formatDate(selectedPost.event_date)}</span>
+                  </div>
+                )}
+                
+                <h2 style={{ fontSize: '2rem', color: 'var(--text-primary)', fontFamily: 'var(--font-serif)', fontWeight: 400, lineHeight: '1.3', marginBottom: '1.5rem' }}>
+                  {selectedPost.title}
+                </h2>
+                
+                <div style={{ width: '60px', height: '2px', backgroundColor: 'var(--accent-color)', opacity: 0.6, marginBottom: '2rem' }}></div>
+                
+                <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '1.05rem', lineHeight: '1.8', fontWeight: 300, whiteSpace: 'pre-wrap', margin: 0, fontFamily: 'var(--font-sans)', letterSpacing: '0.01em' }}>
+                  {selectedPost.content}
+                </p>
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
 
       <style>{`
@@ -713,6 +805,26 @@ const Blog = () => {
 
         .blog-card:hover .blog-card-title {
           color: var(--accent-color);
+        }
+
+        .blog-read-more {
+          color: var(--accent-color);
+          opacity: 0.85;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .blog-card:hover .blog-read-more {
+          color: #fff !important;
+          opacity: 1;
+          transform: translateX(4px);
+        }
+
+        .blog-read-more-icon {
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .blog-card:hover .blog-read-more-icon {
+          transform: scale(1.15) rotate(5deg);
         }
 
         .blog-card-text {
@@ -812,6 +924,28 @@ const Blog = () => {
           animation: modalEntry 0.55s cubic-bezier(0.16, 1, 0.3, 1);
           border: 1px solid rgba(229, 193, 88, 0.15) !important;
           box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6) !important;
+        }
+
+        .blog-read-modal {
+          background: rgba(13, 12, 12, 0.85) !important;
+          backdrop-filter: blur(20px) !important;
+          -webkit-backdrop-filter: blur(20px) !important;
+          animation: modalEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .blog-modal-body::-webkit-scrollbar {
+          width: 6px;
+        }
+        .blog-modal-body::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.01);
+          border-radius: 10px;
+        }
+        .blog-modal-body::-webkit-scrollbar-thumb {
+          background: rgba(229, 193, 88, 0.15);
+          border-radius: 10px;
+        }
+        .blog-modal-body::-webkit-scrollbar-thumb:hover {
+          background: rgba(229, 193, 88, 0.3);
         }
 
         .modal-close-btn:hover {
