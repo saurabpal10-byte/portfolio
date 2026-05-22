@@ -4,62 +4,7 @@ import { ArrowRight, Download, Mail } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from './Icons';
 import profileImg from '../assets/profile_avatar.jpg';
 
-// Zero-dependency matrix-style character decoding scrambler hook
-const roles = ['AI ENGINEERING', 'DEEP LEARNING MODELING', 'DATA ANALYTICS', 'FULL-STACK DEVELOPMENT'];
-const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=';
 
-const Scrambler = () => {
-  const [displayText, setDisplayText] = useState(roles[0]);
-  const [roleIndex, setRoleIndex] = useState(0);
-
-  useEffect(() => {
-    let intervalId;
-    let timeoutId;
-    
-    const triggerScramble = (targetText) => {
-      let iteration = 0;
-      clearInterval(intervalId);
-      
-      intervalId = setInterval(() => {
-        setDisplayText((prev) => 
-          targetText
-            .split('')
-            .map((char, index) => {
-              if (index < iteration) {
-                return targetText[index];
-              }
-              return chars[Math.floor(Math.random() * chars.length)];
-            })
-            .join('')
-        );
-        
-        if (iteration >= targetText.length) {
-          clearInterval(intervalId);
-        }
-        
-        iteration += 1 / 3;
-      }, 30);
-    };
-
-    const cycleRoles = () => {
-      timeoutId = setTimeout(() => {
-        const nextIndex = (roleIndex + 1) % roles.length;
-        setRoleIndex(nextIndex);
-        triggerScramble(roles[nextIndex]);
-        cycleRoles();
-      }, 4500);
-    };
-
-    cycleRoles();
-
-    return () => {
-      clearInterval(intervalId);
-      clearTimeout(timeoutId);
-    };
-  }, [roleIndex]);
-
-  return <span className="scramble-highlight">{displayText}</span>;
-};
 
 // HTML5 Canvas dynamic neural network mesh with mouse attraction
 const NeuralBackdrop = () => {
@@ -224,10 +169,7 @@ const Hero = () => {
               Building intelligent systems that solve <span className="italic-accent">real-world problems.</span>
             </h1>
 
-            {/* Glowing Custom Role Decoders */}
-            <div className="hero-role-scrambler animate-on-scroll visible">
-              <span className="role-scramble-prefix">// FIELD:</span> <Scrambler />
-            </div>
+
 
             <p className="hero-description">
               Final-year Information Science & Engineering student specializing in AI engineering, data analytics, and transforming ideas into scalable intelligent solutions.
@@ -698,31 +640,7 @@ const Hero = () => {
           }
         }
 
-        /* Scrambler Highlight Styles */
-        .hero-role-scrambler {
-          font-family: var(--font-sans);
-          font-size: 0.9rem;
-          font-weight: 500;
-          letter-spacing: 0.12em;
-          margin-bottom: 2.25rem;
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          opacity: 0.9;
-        }
 
-        .role-scramble-prefix {
-          color: var(--text-secondary);
-          opacity: 0.65;
-          font-size: 0.8rem;
-        }
-
-        .scramble-highlight {
-          color: var(--accent-color);
-          font-weight: 700;
-          text-shadow: 0 0 10px rgba(229, 193, 88, 0.2);
-          letter-spacing: 0.05em;
-        }
       `}</style>
     </section>
   );
