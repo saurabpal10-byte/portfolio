@@ -122,6 +122,24 @@ app.delete('/api/posts/:id', (req, res) => {
   }
 });
 
+// Secure Admin Route to retrieve submitted contact messages
+app.get('/api/contacts', (req, res) => {
+  const passcode = req.headers['x-passcode'] || req.query.passcode;
+
+  if (passcode !== 'saurav123') {
+    return res.status(401).json({ error: 'Unauthorized: Invalid passcode' });
+  }
+
+  try {
+    const stmt = db.prepare('SELECT * FROM contacts ORDER BY created_at DESC');
+    const rows = stmt.all();
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching contacts:', err.message);
+    return res.status(500).json({ error: 'Failed to retrieve contact messages' });
+  }
+});
+
 // Serve static assets from the Vite production build
 app.use(express.static(path.join(__dirname, '../dist')));
 
