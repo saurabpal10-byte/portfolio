@@ -5,9 +5,9 @@ import { GithubIcon } from './Icons';
 const projects = [
   {
     title: 'AI Dermatological Diagnosis Tool',
-    description: 'An advanced deep learning diagnostic system utilizing convolutional neural networks to classify skin conditions with high accuracy, bridging clinical theory and live execution.',
-    tech: ['Python', 'TensorFlow', 'FastAPI', 'React', 'Tailwind'],
-    features: ['High-accuracy classification', 'Real-time inference pipeline', 'Secure Patient Data Protection'],
+    description: 'Developed an AI-based dermatological diagnosis tool using CNN and ResNet deep learning models for accurate skin disease classification. Improved model performance through advanced data preprocessing, image augmentation, and fine-tuning techniques. Designed a prototype mobile interface integrated with Grad-CAM visualization to enhance model explainability and provide better diagnostic insights.',
+    tech: ['Python', 'TensorFlow', 'FastAPI', 'React'],
+    features: ['High-accuracy classification', 'Skin disease classification using CNN and ResNet models', 'Advanced image preprocessing and data augmentation', 'Grad-CAM visualization for explainable AI predictions', 'Mobile-friendly interface for real-time image analysis'],
     images: [
       '/projects/derma_tool_2.png'
     ],
@@ -17,9 +17,9 @@ const projects = [
   },
   {
     title: 'Traffic Sign Recognition System',
-    description: 'Real-time traffic sign recognition and classifier system optimized using PyTorch and ResNet models, achieving sub-50ms inference speeds for autonomous driving models.',
+    description: 'Developed a computer vision-based Traffic Sign Recognition system using Python, OpenCV, and CNN models to detect and classify road signs in real time. Trained and evaluated the model on the GTSRB dataset, achieving high accuracy and improving understanding of deep learning, image processing, and real-time driver-assistance applications.',
     tech: ['OpenCV', 'PyTorch', 'ResNet', 'Python', 'Docker'],
-    features: ['Sub-50ms CPU processing speed', 'Multi-class classification', 'Dynamic lighting robustness'],
+    features: ['Real-time traffic sign detection and classification', 'CNN-based deep learning model for high accuracy', 'Trained using the German Traffic Sign Recognition Benchmark (GTSRB) dataset', 'Supports driver-assistance and smart transportation systems'],
     images: [
       '/projects/traffic_sign_2.png'
     ],
@@ -29,9 +29,9 @@ const projects = [
   },
   {
     title: 'AI Jharkhand Tourism Digital Platform',
-    description: 'A contextual NLP conversational interface powered by Google Gemini APIs to enhance state travel experiences with customized dynamic itineraries.',
-    tech: ['NLP', 'Gemini AI', 'Node.js', 'MongoDB', 'React'],
-    features: ['Context-aware chat memory', 'Dynamic PDF itinerary generator', 'Interactive tourist feedback loop'],
+    description: 'Developed an AI-powered tourism platform for Jharkhand featuring an intelligent chatbot that provides travel information and user assistance. Utilized NLP and LLM-based conversational logic to understand user queries and deliver contextual responses. Built scalable backend APIs using Python and FastAPI, enhancing user interaction and tourism accessibility through an interactive digital experience.',
+    tech: ['NLP', 'Gemini API', 'Node.js', 'MongoDB', 'React'],
+    features: ['AI-powered chatbot for real-time tourism guidance and assistance', 'Personalized travel recommendations based on user interests and preferences', 'NLP-based query understanding for accurate and contextual responses', 'Interactive trip planning with destination and route information support'],
     images: [
       '/projects/jharkhand_tourism_1.jpg',
       '/projects/jharkhand_tourism_2.png'

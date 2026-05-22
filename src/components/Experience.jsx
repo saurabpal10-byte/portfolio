@@ -40,7 +40,7 @@ const Experience = () => {
                 fontFamily: 'var(--font-serif)',
                 fontWeight: 400
               }}>
-                Software Engineering Intern
+                Java Development (virtual Internship)
               </h3>
               <span style={{
                 color: 'var(--accent-color)',
@@ -70,15 +70,19 @@ const Experience = () => {
             <ul style={{ color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
               <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.98rem', lineHeight: 1.7, fontWeight: 300 }}>
                 <span style={{ color: 'var(--accent-color)', marginTop: '0.25rem' }}>▹</span>
-                <span>Developed and maintained scalable backend APIs using Python and RESTful principles to support core product features.</span>
+                <span>Assisted in developing and maintaining Java-based applications</span>
               </li>
               <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.98rem', lineHeight: 1.7, fontWeight: 300 }}>
                 <span style={{ color: 'var(--accent-color)', marginTop: '0.25rem' }}>▹</span>
-                <span>Collaborated with the data science team to integrate machine learning models into the production pipeline.</span>
+                <span>Gained hands-on experience with Core Java, OOP, and debugging.</span>
               </li>
               <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.98rem', lineHeight: 1.7, fontWeight: 300 }}>
                 <span style={{ color: 'var(--accent-color)', marginTop: '0.25rem' }}>▹</span>
-                <span>Optimized database queries in MySQL, significantly reducing data retrieval times for large datasets.</span>
+                <span>Contributed to writing, testing, and optimizing code modules.</span>
+              </li>
+              <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.98rem', lineHeight: 1.7, fontWeight: 300 }}>
+                <span style={{ color: 'var(--accent-color)', marginTop: '0.25rem' }}>▹</span>
+                <span>Learned SDLC processes and industry practices.</span>
               </li>
             </ul>
           </div>
