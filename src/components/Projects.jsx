@@ -8,7 +8,10 @@ const projects = [
     description: 'An advanced deep learning diagnostic system utilizing convolutional neural networks to classify skin conditions with high accuracy, bridging clinical theory and live execution.',
     tech: ['Python', 'TensorFlow', 'FastAPI', 'React', 'Tailwind'],
     features: ['High-accuracy classification', 'Real-time inference pipeline', 'Secure Patient Data Protection'],
-    image: '/projects/derma_tool.png',
+    images: [
+      '/projects/derma_tool_2.png'
+    ],
+    imageFit: 'contain',
     github: 'https://github.com/saurabpal10-byte/Al-based-tool-for-preliminary-diagnosis-of-Dermatological-',
     demo: '#'
   },
@@ -17,7 +20,10 @@ const projects = [
     description: 'Real-time traffic sign recognition and classifier system optimized using PyTorch and ResNet models, achieving sub-50ms inference speeds for autonomous driving models.',
     tech: ['OpenCV', 'PyTorch', 'ResNet', 'Python', 'Docker'],
     features: ['Sub-50ms CPU processing speed', 'Multi-class classification', 'Dynamic lighting robustness'],
-    image: '/projects/traffic_sign.png',
+    images: [
+      '/projects/traffic_sign_2.png'
+    ],
+    imageFit: 'contain',
     github: 'https://github.com/saurabpal10-byte/traffic-siign-recognition',
     demo: '#'
   },
@@ -30,12 +36,13 @@ const projects = [
       '/projects/jharkhand_tourism_1.jpg',
       '/projects/jharkhand_tourism_2.png'
     ],
+    imageFit: 'contain',
     github: 'https://github.com/saurabpal10-byte/JH-tourism',
     demo: '#'
   }
 ];
 
-const ProjectImage = ({ images, defaultImage, title }) => {
+const ProjectImage = ({ images, defaultImage, title, imageFit = 'cover' }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const imageList = React.useMemo(() => images || [defaultImage], [images, defaultImage]);
 
@@ -53,6 +60,12 @@ const ProjectImage = ({ images, defaultImage, title }) => {
         src={imageList[0]}
         alt={title}
         className="project-image"
+        style={{
+          objectFit: imageFit,
+          padding: imageFit === 'contain' ? '1.5rem' : '0',
+          width: '100%',
+          height: '100%'
+        }}
       />
     );
   }
@@ -71,7 +84,8 @@ const ProjectImage = ({ images, defaultImage, title }) => {
             left: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: imageFit,
+            padding: imageFit === 'contain' ? '1.5rem' : '0',
             opacity: index === currentIndex ? 1 : 0,
             transform: index === currentIndex ? 'scale(1)' : 'scale(0.95)',
             transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -79,16 +93,16 @@ const ProjectImage = ({ images, defaultImage, title }) => {
           }}
         />
       ))}
-      
+
       {/* Slider dots indicators */}
-      <div style={{ 
-        position: 'absolute', 
-        bottom: '1.25rem', 
-        left: '50%', 
-        transform: 'translateX(-50%)', 
-        display: 'flex', 
-        gap: '0.45rem', 
-        zIndex: 5 
+      <div style={{
+        position: 'absolute',
+        bottom: '1.25rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        gap: '0.45rem',
+        zIndex: 5
       }}>
         {imageList.map((_, index) => (
           <button
@@ -136,11 +150,12 @@ const Projects = () => {
             >
               {/* Project Image Frame */}
               <div className="project-image-frame">
-                <div className="project-image-overlay"></div>
+                {project.imageFit !== 'contain' && <div className="project-image-overlay"></div>}
                 <ProjectImage
                   images={project.images}
                   defaultImage={project.image}
                   title={project.title}
+                  imageFit={project.imageFit}
                 />
               </div>
 
@@ -203,9 +218,6 @@ const Projects = () => {
                   <a href={project.github} target="_blank" rel="noreferrer" className="btn btn-outline" style={{ padding: '0.65rem 1.35rem', fontSize: '0.8rem', borderRadius: '30px' }}>
                     <GithubIcon size={16} /> Code
                   </a>
-                  <a href={project.demo} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ padding: '0.65rem 1.35rem', fontSize: '0.8rem', borderRadius: '30px' }}>
-                    Live Demo <ArrowUpRight size={16} />
-                  </a>
                 </div>
               </div>
             </div>
@@ -224,7 +236,7 @@ const Projects = () => {
           position: relative;
           min-height: 380px;
           overflow: hidden;
-          background-color: #1a1a1a;
+          background-color: #0c0b0b;
           width: 50%;
         }
         
