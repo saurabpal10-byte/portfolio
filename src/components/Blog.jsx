@@ -340,7 +340,7 @@ const Blog = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    opacity: 0,
+                    opacity: 0.6,
                     transition: 'all 0.3s ease',
                     backdropFilter: 'blur(5px)'
                   }}
