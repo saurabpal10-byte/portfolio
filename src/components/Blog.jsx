@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, X, Lock, Camera, Trash2, Loader2, BookOpen, Eye } from 'lucide-react';
 
-const API_BASE = `http://${window.location.hostname}:5000`;
+const API_BASE = import.meta.env.DEV ? `http://${window.location.hostname}:5000` : '';
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);

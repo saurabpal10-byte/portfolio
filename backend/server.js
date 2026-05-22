@@ -129,6 +129,14 @@ app.delete('/api/posts/:id', (req, res) => {
   });
 });
 
+// Serve static assets from the Vite production build
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// Fallback catch-all route for Single Page Application (SPA) routing
+app.get('/*any', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
