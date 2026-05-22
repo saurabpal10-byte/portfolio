@@ -3,6 +3,13 @@ const cors = require('cors');
 const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// Prefer IPv4 resolution over IPv6 to prevent ENETUNREACH in cloud container environments like Render
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
 
 // Load environment variables if local file exists
 try {
